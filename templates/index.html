@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Clothing Upload</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <nav class="navbar">
+        <ul>
+            <li><a href="/">Upload</a></li>
+            <li><a href="/view">View</a></li>
+        </ul>
+    </nav>
+    <div class="container">
+        <h1>Upload Clothing Image</h1>
+        <form action="/upload_file" method="post" enctype="multipart/form-data">
+            <label for="clothing_type">Clothing Type:</label>
+            <select name="clothing_type" id="clothing_type" required>
+                <option value="top">Top</option>
+                <option value="bottom">Bottom</option>
+            </select>
+
+            <label for="image">Upload Image:</label>
+            <input type="file" name="image" id="image" accept="image/*" required>
+
+            <button type="submit">Upload</button>
+        </form>
+    </div>
+</body>
+</html>
