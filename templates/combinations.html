@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Clothing Combinations</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <nav class="navbar">
+        <ul>
+            <li><a href="/">Upload</a></li>
+            <li><a href="/view">View</a></li>
+            <li><a href="/combinations">Combinations</a></li>
+        </ul>
+    </nav>
+    <div class="container">
+        <h1>Outfit Combinations</h1>
+        <div class="combinations-gallery">
+            {% for top, bottom in combinations %}
+                <div class="combination-item">
+                    <div class="top-image">
+                        <img src="{{ url_for('static', filename='images/' + top) }}" alt="Top">
+                    </div>
+                    <div class="bottom-image">
+                        <img src="{{ url_for('static', filename='images/' + bottom) }}" alt="Bottom">
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+</body>
+</html>

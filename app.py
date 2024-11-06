@@ -48,16 +48,55 @@ def upload_file():
 def view_images():
     conn = get_db_connection()
     cur = conn.cursor()
-    cur.execute("SELECT image_filename FROM clothing_images")  # Adjust this query as necessary
+    cur.execute("SELECT image_filename, clothing_type FROM clothing_images")  # Adjust this query as necessary
     images = cur.fetchall()
     cur.close()
     conn.close()
-    
-    # Flatten the list of tuples
-    images = [image[0] for image in images]
-    
+
+    # Debugging: Print out paths to check them
+    for image, clothing_type in images:
+        print(f"Image Path: {os.path.join('static/images', image)}")
+
     return render_template('view.html', images=images)
 
+@app.route('/combinations')
+def combinations():
+    conn = get_db_connection()
+    cur = conn.cursor()
+
+    # Fetch tops and bottoms from the database
+    cur.execute("SELECT image_filename FROM clothing_images WHERE clothing_type = 'top'")
+    tops = cur.fetchall()
+    
+    cur.execute("SELECT image_filename FROM clothing_images WHERE clothing_type = 'bottom'")
+    bottoms = cur.fetchall()
+
+    cur.close()
+    conn.close()
+
+    # Create combinations (all possible pairs of tops and bottoms)
+    combinations = [(top[0], bottom[0]) for top in tops for bottom in bottoms]
+    
+    return render_template('combinations.html', combinations=combinations)
+
+@app.route('/delete/<image_filename>', methods=['POST'])
+def delete_image(image_filename):
+    # Delete the image file from the 'static/images' folder
+    image_path = os.path.join('static/images', image_filename)
+    if os.path.exists(image_path):
+        os.remove(image_path)
+
+    # Remove the image entry from the database
+    conn = get_db_connection()
+    cur = conn.cursor()
+    cur.execute("DELETE FROM clothing_images WHERE image_filename = %s", (image_filename,))
+    conn.commit()
+    cur.close()
+    conn.close()
+
+    flash(f'Image "{image_filename}" deleted successfully!', 'success')
+
+    return redirect(url_for('view_images'))
 
 if __name__ == '__main__':
     app.run(debug=True)
