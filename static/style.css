@@ -1,13 +1,16 @@
+/* Basic Styling */
 body {
     font-family: Arial, sans-serif;
-    background-color: #f4f4f4;
     margin: 0;
     padding: 0;
+    background-color: #f4f4f4;
 }
 
+/* Navbar Styling */
 .navbar {
     background-color: #5cb85c;
-    padding: 10px;
+    padding: 10px 20px;
+    text-align: center;
 }
 
 .navbar ul {
@@ -33,8 +36,9 @@ body {
     background-color: #4cae4c;
 }
 
+/* General Container Styling */
 .container {
-    max-width: 500px;
+    max-width: 1000px;
     margin: 20px auto;
     padding: 20px;
     background: white;
@@ -42,12 +46,8 @@ body {
     border-radius: 5px;
 }
 
-h1 {
-    text-align: center;
-    color: #333;
-}
-
-label {
+/* Form Styling */
+form label {
     display: block;
     margin-bottom: 5px;
     color: #666;
@@ -73,6 +73,7 @@ button:hover {
     background-color: #4cae4c;
 }
 
+/* Image Gallery for Index and View Pages */
 .image-gallery {
     display: flex;
     flex-wrap: wrap;
@@ -90,73 +91,58 @@ button:hover {
     border-radius: 5px;
 }
 
+/* Combinations Gallery */
 .combinations-gallery {
-    display: flex;
-    flex-wrap: wrap;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); /* Ensures at least 3 items per row */
     gap: 20px;
     justify-content: center;
+    padding: 20px;
 }
 
-.outfit {
-    position: relative;
-    width: 150px;
-    height: 300px;
-    margin: 10px;
-}
-
-.outfit-item {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    border-radius: 8px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-}
-
-.outfit-item.top {
-    z-index: 2; /* Top image appears on top */
-    opacity: 0.8;
-}
-
-.outfit-item.bottom {
-    z-index: 1; /* Bottom image appears behind */
-    opacity: 0.9;
-}
-
-.combinations-gallery {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 20px;
-    justify-content: center;
-}
-
+/* Each combination item */
 .combination-item {
     position: relative;
-    width: 150px; /* Adjust as needed */
-    height: 300px; /* Adjust as needed */
-    margin: 20px;
+    width: 100%;
+    height: 300px; /* Adjust the height */
+    margin: 10px;
+    overflow: hidden;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
+/* Top image inside the combination item */
 .top-image img {
     width: 100%;
     height: auto;
+    object-fit: cover;
+    position: absolute; /* Ensure it's above */
+    top: 0;
+    left: 0;
+    z-index: 2; /* Top image on top */
 }
 
+/* Bottom image inside the combination item */
 .bottom-image {
     position: absolute;
-    top: 50%; /* Position bottom image halfway over the top image */
+    top: 0; /* Align it with the top image */
+    left: 0;
     width: 100%;
     height: 100%;
+    z-index: 1; /* Bottom image behind */
 }
 
 .bottom-image img {
     width: 100%;
-    height: auto;
-    opacity: 0.95; /* Slight translucency */
+    height: 100%; /* Ensure it covers the container */
+    object-fit: cover;
+    opacity: 0.85; /* Slightly translucent */
 }
 
+/* Delete button */
 .delete-button {
     background-color: red;
     color: white;
@@ -165,8 +151,96 @@ button:hover {
     cursor: pointer;
     border-radius: 5px;
     font-size: 14px;
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    z-index: 3; /* Ensure it's above the images */
 }
 
 .delete-button:hover {
     background-color: darkred;
 }
+
+/* Responsiveness for smaller screens */
+@media (max-width: 768px) {
+    .combinations-gallery {
+        grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); /* Adjust for smaller screens */
+    }
+}
+
+/* View Page Styling */
+.view-gallery {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 15px;
+    padding: 20px;
+}
+
+.image-item {
+    position: relative;
+    width: 150px; /* Adjust width as needed */
+    height: 150px; /* Adjust height as needed */
+    overflow: hidden;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    margin-bottom: 10px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column; /* Align text to the bottom */
+    min-height: 180px; /* Ensure enough height for the image and text */
+}
+
+/* Category text styling */
+.category-text {
+    position: absolute;
+    bottom: 0; /* Position the text at the bottom */
+    left: 0;
+    right: 0;
+    text-align: center;
+    background-color: rgba(0, 0, 0, 0.5); /* Optional background for contrast */
+    color: white;
+    padding: 5px;
+    font-size: 14px;
+}
+
+/* Adjust the image size */
+.image-item img {
+    width: 100%;
+    height: auto;
+    object-fit: cover;
+}
+
+/* Make the gallery responsive */
+@media (max-width: 768px) {
+    .view-gallery {
+        gap: 10px;
+    }
+
+    .image-item {
+        width: 120px;
+        height: 120px;
+    }
+
+    /* Adjust minimum height for smaller screens */
+    .image-item {
+        min-height: 150px;
+    }
+}
+
+.reset-button {
+    background-color: #ff4d4d;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+    margin-bottom: 20px;
+}
+
+.reset-button:hover {
+    background-color: #ff6666;
+}
+

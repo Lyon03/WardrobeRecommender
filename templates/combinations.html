@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Clothing Combinations</title>
+    <title>Combinations</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
@@ -15,19 +15,71 @@
         </ul>
     </nav>
     <div class="container">
-        <h1>Outfit Combinations</h1>
-        <div class="combinations-gallery">
+        <h1>Suggested Combinations</h1>
+        <!-- Reset Preferences Button -->
+        <form action="{{ url_for('reset_preferences') }}" method="post">
+            <button type="submit" class="reset-button">Reset Preferences</button>
+        </form>
+
+        <div class="combinations-grid">
             {% for top, bottom in combinations %}
-                <div class="combination-item">
-                    <div class="top-image">
-                        <img src="{{ url_for('static', filename='images/' + top) }}" alt="Top">
-                    </div>
-                    <div class="bottom-image">
-                        <img src="{{ url_for('static', filename='images/' + bottom) }}" alt="Bottom">
-                    </div>
-                </div>
+            <div class="combination-item">
+                <img src="{{ url_for('static', filename='images/' + top) }}" alt="Top Image">
+                <img src="{{ url_for('static', filename='images/' + bottom) }}" alt="Bottom Image">
+                
+                <form>
+                    <button type="button" class="approve-button" data-top="{{ top }}" data-bottom="{{ bottom }}">
+                        {% if (top, bottom) in approved_combinations %}
+                            Approved
+                        {% else %}
+                            Approve
+                        {% endif %}
+                    </button>
+                </form>
+
+                {% if scores %}
+                    <p class="likability-score">Predicted Likability: {{ scores[(top, bottom)]|round(2) }}</p>
+                {% endif %}
+            </div>
             {% endfor %}
         </div>
     </div>
+
+    <!-- JavaScript for asynchronous approval handling -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            document.addEventListener('click', function (event) {
+                // Check if the clicked element has the 'approve-button' class
+                if (event.target.classList.contains('approve-button')) {
+                    event.preventDefault();
+
+                    const button = event.target;
+                    const top = button.getAttribute('data-top');
+                    const bottom = button.getAttribute('data-bottom');
+                    const scoreElement = button.closest('.combination-item').querySelector('.likability-score');
+
+                    // Send asynchronous POST request with top and bottom values
+                    fetch("{{ url_for('approve_combination') }}", {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/x-www-form-urlencoded"
+                        },
+                        body: new URLSearchParams({ top: top, bottom: bottom })
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        // Update button text based on approval status
+                        button.innerText = data.status === 'approved' ? "Approved" : "Approve";
+
+                        // Update the likability score display
+                        if (scoreElement) {
+                            scoreElement.innerText = `Predicted Likability: ${data.new_score}`;
+                        }
+                    })
+                    .catch(error => console.error('Error:', error));
+                }
+            });
+        });
+    </script>
 </body>
 </html>
