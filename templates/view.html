@@ -14,13 +14,35 @@
             <li><a href="/combinations">Combinations</a></li>
         </ul>
     </nav>
+
     <div class="container">
         <h1>Uploaded Images</h1>
+
+        <!-- Filter Form -->
+        <form method="get" action="{{ url_for('view_images') }}" class="filter-form">
+            <label for="clothing_type">Filter by Clothing Type:</label>
+            <select name="clothing_type" id="clothing_type" onchange="this.form.submit()">
+                <option value="" {% if not clothing_type_filter %}selected{% endif %}>All</option>
+                <option value="top" {% if clothing_type_filter == 'top' %}selected{% endif %}>Top</option>
+                <option value="bottom" {% if clothing_type_filter == 'bottom' %}selected{% endif %}>Bottom</option>
+            </select>
+
+            <label for="color_name">Filter by Color:</label>
+            <select name="color_name" id="color_name" onchange="this.form.submit()">
+                <option value="" {% if not color_filter %}selected{% endif %}>All</option>
+                {% for color_name in color_names %}
+                    <option value="{{ color_name }}" {% if color_filter == color_name %}selected{% endif %}>{{ color_name.capitalize() }}</option>
+                {% endfor %}
+            </select>
+        </form>
+
+        <!-- Image Gallery -->
         <div class="image-gallery">
-            {% for image, clothing_type in images %}
+            {% for image, clothing_type, color_name in images %}
                 <div class="image-item">
                     <img src="{{ url_for('static', filename='images/' + image) }}" alt="{{ image }}">
-                    <p>{{ clothing_type }}</p>
+                    <p><strong>Type:</strong> {{ clothing_type }}</p>
+                    <p><strong>Color:</strong> {{ color_name }}</p>
                     <!-- Delete Button Form -->
                     <form action="{{ url_for('delete_image', image_filename=image) }}" method="POST">
                         <button type="submit" class="delete-button">Delete</button>
@@ -29,5 +51,61 @@
             {% endfor %}
         </div>
     </div>
+
+    <style>
+        /* Styling for Filter Form */
+        .filter-form {
+            margin-bottom: 20px;
+            font-size: 1.1em;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .filter-form select {
+            padding: 5px;
+            font-size: 1em;
+        }
+
+        /* Styling for Image Gallery */
+        .image-gallery {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+        }
+
+        .image-item {
+            border: 1px solid #ddd;
+            padding: 10px;
+            text-align: center;
+            border-radius: 8px;
+            box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .image-item img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 5px;
+        }
+
+        .image-item p {
+            margin: 8px 0;
+            font-size: 0.9em;
+            color: #333;
+        }
+
+        .delete-button {
+            padding: 5px 10px;
+            background-color: #ff4d4d;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .delete-button:hover {
+            background-color: #e60000;
+        }
+    </style>
 </body>
 </html>

@@ -5,6 +5,64 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Clothing Combinations</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <style>
+        /* General Layout */
+        .container {
+            padding: 20px;
+        }
+        .combinations-section {
+            margin-top: 20px;
+        }
+        .combinations-section h2 {
+            margin-bottom: 10px;
+            font-size: 1.2em;
+            color: #333;
+        }
+        .combinations-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 20px;
+        }
+        .combination-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            background-color: #f9f9f9;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .combination-item img {
+            width: 100%;
+            height: auto;
+            object-fit: cover;
+            border-radius: 5px;
+            margin-bottom: 5px;
+        }
+        .top-label {
+            font-size: 0.9em;
+            color: #555;
+            margin-bottom: 10px;
+        }
+        .approve-button {
+            padding: 8px 12px;
+            border: none;
+            background-color: #4CAF50;
+            color: white;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        .approve-button.approved {
+            background-color: #2196F3;
+        }
+        .likability-score {
+            margin-top: 8px;
+            font-size: 14px;
+            color: #555;
+        }
+    </style>
 </head>
 <body>
     <nav class="navbar">
@@ -15,19 +73,102 @@
         </ul>
     </nav>
     <div class="container">
-        <h1>Outfit Combinations</h1>
-        <div class="combinations-gallery">
-            {% for top, bottom in combinations %}
-                <div class="combination-item">
-                    <div class="top-image">
-                        <img src="{{ url_for('static', filename='images/' + top) }}" alt="Top">
+        <h1>Suggested Combinations</h1>
+
+        <!-- Filter by Season -->
+        <form method="get" action="{{ url_for('combinations') }}" class="season-filter">
+            <label for="season">Filter by Season:</label>
+            <select name="season" id="season">
+                <option value="">All Seasons</option>
+                <option value="Spring" {% if season_filter == 'Spring' %}selected{% endif %}>Spring</option>
+                <option value="Summer" {% if season_filter == 'Summer' %}selected{% endif %}>Summer</option>
+                <option value="Autumn" {% if season_filter == 'Autumn' %}selected{% endif %}>Autumn</option>
+                <option value="Winter" {% if season_filter == 'Winter' %}selected{% endif %}>Winter</option>
+            </select>
+            
+            <label for="top_color">Filter by Top Color:</label>
+            <select name="top_color" id="top_color">
+                <option value="">All Colors</option>
+                {% for color in top_colors %}
+                    <option value="{{ color }}" {% if color_filter == color %}selected{% endif %}>{{ color }}</option>
+                {% endfor %}
+            </select>
+            
+            <button type="submit">Apply Filter</button>
+        </form>
+
+        <!-- Reset Preferences Button -->
+        <form action="{{ url_for('reset_preferences') }}" method="post">
+            <button type="submit" class="reset-button">Reset Preferences</button>
+        </form>
+
+        <!-- Group Combinations by Top Color -->
+        {% for color, color_combinations in combinations_by_color.items() %}
+            <div class="combinations-section">
+                <h2>{{ color }}</h2>
+                <div class="combinations-grid">
+                    {% for top, bottom in color_combinations %}
+                    <div class="combination-item">
+                        <div class="top-label">{{ color }}</div>
+                        <div class="top-image">
+                            <img src="{{ url_for('static', filename='images/' + top) }}" alt="Top Image">
+                        </div>
+                        <div class="bottom-image">
+                            <img src="{{ url_for('static', filename='images/' + bottom) }}" alt="Bottom Image">
+                        </div>
+
+                        <form>
+                            <button type="button" class="approve-button {% if (top, bottom) in session['approved_combinations'] %}approved{% endif %}" data-top="{{ top }}" data-bottom="{{ bottom }}">
+                                {% if (top, bottom) in session['approved_combinations'] %}
+                                    Approved
+                                {% else %}
+                                    Approve
+                                {% endif %}
+                            </button>
+                        </form>
+
+                        {% if scores %}
+                            <p class="likability-score">Predicted Likability: {{ scores[(top, bottom)]|round(2) }}</p>
+                        {% endif %}
                     </div>
-                    <div class="bottom-image">
-                        <img src="{{ url_for('static', filename='images/' + bottom) }}" alt="Bottom">
-                    </div>
+                    {% endfor %}
                 </div>
-            {% endfor %}
-        </div>
+            </div>
+        {% endfor %}
     </div>
+
+    <!-- JavaScript for asynchronous approval handling -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            document.addEventListener('click', function (event) {
+                if (event.target.classList.contains('approve-button')) {
+                    event.preventDefault();
+
+                    const button = event.target;
+                    const top = button.getAttribute('data-top');
+                    const bottom = button.getAttribute('data-bottom');
+                    const scoreElement = button.closest('.combination-item').querySelector('.likability-score');
+
+                    fetch("{{ url_for('approve_combination') }}", {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/x-www-form-urlencoded"
+                        },
+                        body: new URLSearchParams({ top: top, bottom: bottom })
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        button.innerText = data.status === 'approved' ? "Approved" : "Approve";
+                        button.classList.toggle('approved', data.status === 'approved');
+
+                        if (scoreElement) {
+                            scoreElement.innerText = `Predicted Likability: ${data.new_score}`;
+                        }
+                    })
+                    .catch(error => console.error('Error:', error));
+                }
+            });
+        });
+    </script>
 </body>
 </html>
